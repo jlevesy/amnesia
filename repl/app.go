@@ -22,6 +22,8 @@ var (
 	// ErrExit is raised when the REPL handles a .exit command
 	// It represents a correct exit of the REPL loop.
 	ErrExit = errors.New("exit")
+
+	errInterupt = errors.New("interrupt")
 )
 
 // App is the representation of an REPL app
@@ -62,11 +64,16 @@ func (a *app) Run() error {
 
 		cmd, err := a.readLine()
 
+		if err == errInterupt {
+			a.out.Write([]byte("\n"))
+			continue
+		}
+
 		if err != nil {
 			return err
 		}
 
-		if err := a.handleCommand(cmd); err != nil {
+		if err = a.handleCommand(cmd); err != nil {
 			return err
 		}
 	}
@@ -93,6 +100,10 @@ func (a *app) readLine() (string, error) {
 	case err := <-a.readErr:
 		return "", err
 	case sig := <-a.sigs:
+		if sig == syscall.SIGINT {
+			return "", errInterupt
+		}
+
 		return "", fmt.Errorf("received a signal %v, exiting", sig)
 	}
 }
