@@ -1,55 +1,28 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
+
+	"github.com/jlevesy/amnesia/repl"
 )
 
 const (
-	prompt = "amnesia> "
-
-	cmdExit = ".exit"
-
-	errMsgUnknownCommand = "unknown command"
+	msgExit = "Bye."
 )
 
-func renderPrompt(out io.Writer) error {
-	_, err := out.Write([]byte(prompt))
-
-	return err
-}
-
-func readLine(in *bufio.Reader) (string, error) {
-	raw, _, err := in.ReadLine()
-	if err != nil {
-		return "", err
-	}
-	return string(raw), nil
-}
-
 func main() {
-	bufStdin := bufio.NewReader(os.Stdin)
+	app := repl.New(os.Stdin, os.Stdout)
 
-	for {
-		if err := renderPrompt(os.Stdout); err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
+	err := app.Run()
 
-		cmd, err := readLine(bufStdin)
+	if err == repl.ErrExit {
+		fmt.Println(msgExit)
+		os.Exit(0)
+	}
 
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		switch cmd {
-		case cmdExit:
-			os.Exit(0)
-		default:
-			fmt.Fprintln(os.Stdout, errMsgUnknownCommand)
-		}
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 }
