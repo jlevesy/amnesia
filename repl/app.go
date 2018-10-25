@@ -15,7 +15,7 @@ const (
 
 	cmdExit = ".exit"
 
-	errMsgUnknownCommand = "unknown command"
+	errMsgUnknownCommand = "unknown command '%s'\n"
 )
 
 var (
@@ -113,7 +113,7 @@ func (a *app) handleCommand(cmd string) error {
 	case cmdExit:
 		return ErrExit
 	default:
-		fmt.Fprintln(os.Stdout, errMsgUnknownCommand)
+		fmt.Fprintf(os.Stdout, errMsgUnknownCommand, cmd)
 	}
 
 	return nil
