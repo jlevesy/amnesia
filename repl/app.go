@@ -69,6 +69,11 @@ func (a *app) Run() error {
 			continue
 		}
 
+		if err == io.EOF {
+			a.out.Write([]byte("\n"))
+			return ErrExit
+		}
+
 		if err != nil {
 			return err
 		}
